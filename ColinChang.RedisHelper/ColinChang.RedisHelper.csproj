@@ -2,6 +2,14 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <PackageLicenseUrl>https://raw.githubusercontent.com/colin-chang/RedisHelper/master/LICENSE</PackageLicenseUrl>
+    <Authors>Colin Chang</Authors>
+    <Copyright>https://colin-chang.site/</Copyright>
+    <PackageProjectUrl>https://github.com/colin-chang/RedisHelper</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/colin-chang/RedisHelper</RepositoryUrl>
+    <RepositoryType>Git</RepositoryType>
+    <PackageTags>redis redis.net redis.driver redis.helper,redis.net.core</PackageTags>
+    <Description>A common redis helper based on StackExchange.Redis.</Description>
   </PropertyGroup>
 
   <ItemGroup>
