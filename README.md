@@ -7,3 +7,12 @@
 * 支持分布式锁
 
 > 使用RedisHelper时建议使用单例
+
+**[Nuget](https://www.nuget.org/packages/ColinChang.RedisHelper/)**
+```sh
+# Package Manager
+Install-Package ColinChang.RedisHelper
+
+# .NET CLI
+dotnet add package ColinChang.RedisHelper
+```
