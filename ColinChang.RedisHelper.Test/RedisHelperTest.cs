@@ -7,7 +7,7 @@ using StackExchange.Redis;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace ColinChang.OpenSource.RedisHelper.Test
+namespace ColinChang.RedisHelper.Test
 {
     public class RedisHelperTest
     {

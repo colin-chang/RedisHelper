@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using StackExchange.Redis;
 using Newtonsoft.Json;
 
-namespace ColinChang.OpenSource.RedisHelper
+namespace ColinChang.RedisHelper
 {
     public class RedisHelper
     {

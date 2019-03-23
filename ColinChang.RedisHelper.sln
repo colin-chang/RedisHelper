@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.26124.0
 MinimumVisualStudioVersion = 15.0.26124.0
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ColinChang.OpenSource.RedisHelper", "ColinChang.OpenSource.RedisHelper\ColinChang.OpenSource.RedisHelper.csproj", "{DDBF328E-F301-4D26-9E0C-6BAAD96F8B52}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ColinChang.RedisHelper", "ColinChang.RedisHelper\ColinChang.RedisHelper.csproj", "{DDBF328E-F301-4D26-9E0C-6BAAD96F8B52}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ColinChang.OpenSource.RedisHelper.Test", "ColinChang.OpenSource.RedisHelper.Test\ColinChang.OpenSource.RedisHelper.Test.csproj", "{DE65275C-5DA0-4BAC-9A76-6B5568187DCE}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ColinChang.RedisHelper.Test", "ColinChang.RedisHelper.Test\ColinChang.RedisHelper.Test.csproj", "{DE65275C-5DA0-4BAC-9A76-6B5568187DCE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
