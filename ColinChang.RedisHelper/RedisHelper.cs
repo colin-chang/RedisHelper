@@ -120,7 +120,7 @@ namespace ColinChang.RedisHelper
         /// <summary>
         /// 删除给定Key
         /// </summary>
-        /// <param name="keys">带删除的key集合</param>
+        /// <param name="keys">待删除的key集合</param>
         /// <returns>删除key的数量</returns>
         public async Task<long> KeyDeleteAsync(IEnumerable<string> keys) =>
             await Db.KeyDeleteAsync(keys.Select(k => (RedisKey) k).ToArray());
