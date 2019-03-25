@@ -63,6 +63,9 @@ namespace ColinChang.RedisHelper
 
         public async Task<IEnumerable<T>> SetMembersAsync<T>(string key) where T : class =>
             (await Db.SetMembersAsync(key)).ToObjects<T>();
+        
+        public async Task<bool> SetContainsAsync<T>(string key, T value) =>
+            await Db.SetContainsAsync(key, value.ToRedisValue());
 
         #endregion
 
