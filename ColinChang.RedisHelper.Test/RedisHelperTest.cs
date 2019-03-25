@@ -59,6 +59,7 @@ namespace ColinChang.RedisHelper.Test
 
             Assert.True(await _redis.SetAddAsync(key, 0));
             Assert.True(await _redis.SetAddAsync(key, 1));
+            Assert.True(await _redis.SetContainsAsync(key, 1));
             Assert.False(await _redis.SetAddAsync(key, 1));
 
             var cameras = await _redis.SetMembersAsync<string>(key);

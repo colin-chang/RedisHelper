@@ -8,8 +8,12 @@
     <PackageProjectUrl>https://github.com/colin-chang/RedisHelper</PackageProjectUrl>
     <RepositoryUrl>https://github.com/colin-chang/RedisHelper</RepositoryUrl>
     <RepositoryType>Git</RepositoryType>
-    <PackageTags>redis redis.net redis.driver redis.helper,redis.net.core</PackageTags>
+    <PackageTags>redis redis.net redis.driver redis.helper redis.net.core</PackageTags>
     <Description>A common redis helper based on StackExchange.Redis.</Description>
+    <AssemblyVersion>1.0.1.0</AssemblyVersion>
+    <FileVersion>1.0.1.0</FileVersion>
+    <PackageReleaseNotes>Add SetContainsAsync function</PackageReleaseNotes>
+    <Version>1.0.1</Version>
   </PropertyGroup>
 
   <ItemGroup>
