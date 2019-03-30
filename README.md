@@ -1,5 +1,5 @@
 # RedisHelper
-基于`StackExchange.Redis`的Redis操作帮助类，基于`.Net Standard 2.0`
+This is a redis operation utility based on StackExchange.Redis.It's built for.Net Standard 2.0.
 
 **[Nuget](https://www.nuget.org/packages/ColinChang.RedisHelper/)**
 ```sh
@@ -9,10 +9,12 @@ Install-Package ColinChang.RedisHelper
 # .NET CLI
 dotnet add package ColinChang.RedisHelper
 ```
+**Supported**
 
-* 包含`String,List,Set,SortedSet,Hash`等常用数据类型操作。
-* 支持发布订阅
-* 支持批量执行
-* 支持分布式锁
+* Data types:`String,List,Set,SortedSet,Hash`
+* Pub/Sub
+* Path commands
+* Distrubution lock
 
-**使用RedisHelper时建议使用单例**
+**Tips**
+we highly recommend that use this as a singleton instance to reuse the redis connection.
