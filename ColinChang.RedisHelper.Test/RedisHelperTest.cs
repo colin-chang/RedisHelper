@@ -111,6 +111,8 @@ namespace ColinChang.RedisHelper.Test
                 ["age"] = "18"
             });
 
+            Assert.True(await _redis.HashDeleteAsync(key, "name"));
+            
             await _redis.HashSetAsync(key, new Dictionary<string, string>
             {
                 ["age"] = "20"

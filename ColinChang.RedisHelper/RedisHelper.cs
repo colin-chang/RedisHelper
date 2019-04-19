@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 using StackExchange.Redis;
@@ -63,7 +64,7 @@ namespace ColinChang.RedisHelper
 
         public async Task<IEnumerable<T>> SetMembersAsync<T>(string key) where T : class =>
             (await Db.SetMembersAsync(key)).ToObjects<T>();
-        
+
         public async Task<bool> SetContainsAsync<T>(string key, T value) =>
             await Db.SetContainsAsync(key, value.ToRedisValue());
 
@@ -115,6 +116,9 @@ namespace ColinChang.RedisHelper
 
         public async Task<Dictionary<string, string>> HashGetAllAsync(string key) =>
             (await Db.HashGetAllAsync(key)).ToDictionary();
+
+        public async Task<bool> HashDeleteAsync(string key, string hashField) =>
+            await Db.HashDeleteAsync(key, hashField);
 
         #endregion
 
