@@ -112,7 +112,7 @@ namespace ColinChang.RedisHelper.Test
             });
 
             Assert.True(await _redis.HashDeleteAsync(key, "name"));
-            
+
             await _redis.HashSetAsync(key, new Dictionary<string, string>
             {
                 ["age"] = "20"
@@ -153,6 +153,14 @@ namespace ColinChang.RedisHelper.Test
             Assert.Equal(value, await _redis.StringGetAsync<string>(key));
             await Task.Delay(3000);
             Assert.Null(await _redis.StringGetAsync<string>(key));
+        }
+
+        [Fact]
+        public void GetAllKeys()
+        {
+            var keys = _redis.GetAllKeys();
+            foreach (var key in keys)
+                _testOutputHelper.WriteLine(key);
         }
 
         [Fact]

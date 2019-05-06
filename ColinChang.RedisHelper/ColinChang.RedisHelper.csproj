@@ -2,18 +2,19 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <PackageLicenseUrl></PackageLicenseUrl>
     <Authors>Colin Chang</Authors>
     <Copyright>https://colin-chang.site/</Copyright>
     <PackageProjectUrl>https://github.com/colin-chang/RedisHelper</PackageProjectUrl>
     <RepositoryUrl>https://github.com/colin-chang/RedisHelper</RepositoryUrl>
     <RepositoryType>Git</RepositoryType>
     <PackageTags>redis redis.net redis.driver redis.helper redis.net.core</PackageTags>
-    <Description>A common redis helper based on StackExchange.Redis.</Description>
-    <AssemblyVersion>1.0.2.0</AssemblyVersion>
+    <Description>This is a common redis helper based on StackExchange.Redis.</Description>
+    <AssemblyVersion>1.0.3.0</AssemblyVersion>
     <FileVersion>1.0.2.0</FileVersion>
-    <PackageReleaseNotes>Add HashDeleteAsync method</PackageReleaseNotes>
-    <Version>1.0.2</Version>
+    <PackageReleaseNotes>Add 2 methods below
+1. GetAllKeys
+2. KeyExistsAsync</PackageReleaseNotes>
+    <Version>1.0.3</Version>
     <PackageIconUrl>https://raw.githubusercontent.com/colin-chang/RedisHelper/master/redis.ico</PackageIconUrl>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
   </PropertyGroup>
@@ -29,5 +30,4 @@
       <PackagePath></PackagePath>
     </None>
   </ItemGroup>
-
 </Project>

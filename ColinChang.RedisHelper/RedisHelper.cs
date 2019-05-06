@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 using StackExchange.Redis;
 using Newtonsoft.Json;
+using System.Net;
 
 namespace ColinChang.RedisHelper
 {
@@ -124,6 +124,16 @@ namespace ColinChang.RedisHelper
 
         #region Key
 
+        public IEnumerable<string> GetAllKeys() =>
+            _conn.GetEndPoints().Select(endPoint => _conn.GetServer(endPoint))
+                .SelectMany(server => server.Keys().ToStrings());
+
+        public IEnumerable<string> GetAllKeys(EndPoint endPoint) =>
+            _conn.GetServer(endPoint).Keys().ToStrings();
+
+        public async Task<bool> KeyExistsAsync(string key) =>
+            await Db.KeyExistsAsync(key);
+
         /// <summary>
         /// 删除给定Key
         /// </summary>
@@ -199,10 +209,13 @@ namespace ColinChang.RedisHelper
 
     public static class StackExchangeRedisExtension
     {
+        public static IEnumerable<string> ToStrings(this IEnumerable<RedisKey> keys) => keys.Select(k => (string) k);
+
         public static RedisValue ToRedisValue<T>(this T value) =>
             value is ValueType || value is string
                 ? value.ToString()
                 : JsonConvert.SerializeObject(value);
+
 
         public static RedisValue[] ToRedisValues<T>(this IEnumerable<T> values) =>
             values.Select(v => v.ToRedisValue()).ToArray();
