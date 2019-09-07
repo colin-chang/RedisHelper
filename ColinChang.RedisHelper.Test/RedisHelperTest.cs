@@ -45,7 +45,7 @@ namespace ColinChang.RedisHelper.Test
             await _redis.EnqueueAsync(key, 4.8);
             await _redis.EnqueueAsync(key, 5.2);
 
-            var pockets = await _redis.GetFromQueue<string>(key, 1, 1);
+            var pockets = await _redis.PeekRangeAsync<string>(key, 1, 1);
             Assert.Equal("5.2", pockets.FirstOrDefault());
 
             Assert.Equal("4.8", await _redis.DequeueAsync<string>(key));
@@ -110,27 +110,24 @@ namespace ColinChang.RedisHelper.Test
                 ["name"] = "colin",
                 ["age"] = "18"
             });
+            Assert.True(await _redis.HashDeleteFieldsAsync(key, new string[] {"name"}));
 
-            Assert.True(await _redis.HashDeleteAsync(key, "name"));
-
-            await _redis.HashSetAsync(key, new Dictionary<string, string>
+            await _redis.HashSetFieldsAsync(key, new Dictionary<string, string>
             {
                 ["age"] = "20"
             });
 
-            var dict = await _redis.HashGetAsync(key, new[] {"age"});
+            var dict = await _redis.HashGetFieldsAsync(key, new[] {"age"});
             Assert.Equal("20", dict["age"]);
 
-/*            var all = await _redis.HashGetAllAsync(key);
-            Assert.Equal("colin", all["name"]);*/
-
-            await _redis.KeyDeleteAsync(new[] {key});
+            await _redis.HashDeleteAsync(key);
         }
+
 
         [Fact]
         public async Task BatchExecuteAsync()
         {
-            await _redis.BatchExecuteAsync(
+            await _redis.ExecuteBatchAsync(
                 async () => await _redis.StringSetAsync("name", "colin"),
                 async () => await _redis.SetAddAsync("guys", "robin")
             );
@@ -182,10 +179,14 @@ namespace ColinChang.RedisHelper.Test
         public async Task LockExecuteTestAsync()
         {
             var key = "lockTest";
-
+            var func = new Func<int, int, int>((a, b) =>
+            {
+                Thread.Sleep(1000);
+                return a + b;
+            });
             for (var i = 0; i < 10; i++)
             {
-                ThreadPool.QueueUserWorkItem(async state =>
+                new Thread(async () =>
                 {
                     var (success, res) = await _redis.LockExecuteAsync(key,
                         Guid.NewGuid().ToString(),
@@ -194,11 +195,9 @@ namespace ColinChang.RedisHelper.Test
                         1, 2
                     );
                     if (success)
-                    {
-                        _testOutputHelper.WriteLine($"{Thread.CurrentThread.ManagedThreadId.ToString()} get the lock");
-                        _testOutputHelper.WriteLine($"result is {res}");
-                    }
-                });
+                        _testOutputHelper.WriteLine(
+                            $"thread-{Thread.CurrentThread.ManagedThreadId.ToString()} get the lock.result is {res}");
+                }) {IsBackground = true}.Start();
             }
 
             await Task.Delay(3000);

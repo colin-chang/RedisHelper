@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ColinChang.RedisHelper", "C
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ColinChang.RedisHelper.Test", "ColinChang.RedisHelper.Test\ColinChang.RedisHelper.Test.csproj", "{DE65275C-5DA0-4BAC-9A76-6B5568187DCE}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ColinChang.RedisHelper.ConsoleTest", "ColinChang.RedisHelper.ConsoleTest\ColinChang.RedisHelper.ConsoleTest.csproj", "{DF85470D-C65D-452F-A1AA-233CBE26A33E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -44,5 +46,17 @@ Global
 		{DE65275C-5DA0-4BAC-9A76-6B5568187DCE}.Release|x64.Build.0 = Release|Any CPU
 		{DE65275C-5DA0-4BAC-9A76-6B5568187DCE}.Release|x86.ActiveCfg = Release|Any CPU
 		{DE65275C-5DA0-4BAC-9A76-6B5568187DCE}.Release|x86.Build.0 = Release|Any CPU
+		{DF85470D-C65D-452F-A1AA-233CBE26A33E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DF85470D-C65D-452F-A1AA-233CBE26A33E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DF85470D-C65D-452F-A1AA-233CBE26A33E}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{DF85470D-C65D-452F-A1AA-233CBE26A33E}.Debug|x64.Build.0 = Debug|Any CPU
+		{DF85470D-C65D-452F-A1AA-233CBE26A33E}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{DF85470D-C65D-452F-A1AA-233CBE26A33E}.Debug|x86.Build.0 = Debug|Any CPU
+		{DF85470D-C65D-452F-A1AA-233CBE26A33E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DF85470D-C65D-452F-A1AA-233CBE26A33E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DF85470D-C65D-452F-A1AA-233CBE26A33E}.Release|x64.ActiveCfg = Release|Any CPU
+		{DF85470D-C65D-452F-A1AA-233CBE26A33E}.Release|x64.Build.0 = Release|Any CPU
+		{DF85470D-C65D-452F-A1AA-233CBE26A33E}.Release|x86.ActiveCfg = Release|Any CPU
+		{DF85470D-C65D-452F-A1AA-233CBE26A33E}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

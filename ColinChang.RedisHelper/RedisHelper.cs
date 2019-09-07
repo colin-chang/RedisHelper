@@ -5,6 +5,8 @@ using System.Threading.Tasks;
 using StackExchange.Redis;
 using Newtonsoft.Json;
 using System.Net;
+using System.Threading;
+using Timer = System.Timers.Timer;
 
 namespace ColinChang.RedisHelper
 {
@@ -49,7 +51,8 @@ namespace ColinChang.RedisHelper
         /// <param name="stop">结束位置</param>
         /// <typeparam name="T">对象类型</typeparam>
         /// <returns>不指定 start、end 则获取所有数据</returns>
-        public async Task<IEnumerable<T>> GetFromQueue<T>(string key, long start = 0, long stop = -1) where T : class =>
+        public async Task<IEnumerable<T>> PeekRangeAsync<T>(string key, long start = 0, long stop = -1)
+            where T : class =>
             (await Db.ListRangeAsync(key, start, stop)).ToObjects<T>();
 
         #endregion
@@ -107,18 +110,35 @@ namespace ColinChang.RedisHelper
 
         #region Hash
 
+        public async Task<Dictionary<string, string>> HashGetAsync(string key) =>
+            (await Db.HashGetAllAsync(key)).ToDictionary();
+
+        public async Task<Dictionary<string, string>> HashGetFieldsAsync(string key, IEnumerable<string> fields) =>
+            (await Db.HashGetAsync(key, fields.ToRedisValues())).ToDictionary(fields);
+
         public async Task HashSetAsync(string key, Dictionary<string, string> entries) =>
             await Db.HashSetAsync(key, entries.ToHashEntries());
 
-        public async Task<Dictionary<string, string>> HashGetAsync(string key, IEnumerable<string> fields) =>
-            (await Db.HashGetAsync(key, fields.ToRedisValues())).ToDictionary(fields);
+        public async Task HashSetFieldsAsync(string key, Dictionary<string, string> fields)
+        {
+            var hs = await HashGetAsync(key);
+            foreach (var field in fields)
+                hs[field.Key] = field.Value;
 
+            await HashSetAsync(key, hs);
+        }
 
-        public async Task<Dictionary<string, string>> HashGetAllAsync(string key) =>
-            (await Db.HashGetAllAsync(key)).ToDictionary();
+        public async Task<bool> HashDeleteAsync(string key) =>
+            await KeyDeleteAsync(new string[] {key}) > 0;
 
-        public async Task<bool> HashDeleteAsync(string key, string hashField) =>
-            await Db.HashDeleteAsync(key, hashField);
+        public async Task<bool> HashDeleteFieldsAsync(string key, IEnumerable<string> fields)
+        {
+            foreach (var field in fields)
+                if (!await Db.HashDeleteAsync(key, field))
+                    return false;
+
+            return true;
+        }
 
         #endregion
 
@@ -168,7 +188,7 @@ namespace ColinChang.RedisHelper
         /// 批量执行Redis操作
         /// </summary>
         /// <param name="operations"></param>
-        public Task BatchExecuteAsync(params Action[] operations) =>
+        public Task ExecuteBatchAsync(params Action[] operations) =>
             Task.Run(() =>
             {
                 var batch = Db.CreateBatch();
@@ -179,34 +199,20 @@ namespace ColinChang.RedisHelper
                 batch.Execute();
             });
 
-        public async Task<bool> LockExecuteAsync(string key, string value, Action action,
-            int expiryMillisecond = 3000)
-        {
-            var (success, res) = await LockExecuteAsync(key, value, (Delegate) action, expiryMillisecond);
-            return success;
-        }
-
-        public async Task<bool> LockExecuteAsync<T>(string key, string value, Action action, T arg,
-            int expiryMillisecond = 3000)
-        {
-            var (success, res) = await LockExecuteAsync(key, value, action, expiryMillisecond, arg);
-            return success;
-        }
 
         /// <summary>
-        /// 获取分布式锁并执行
+        /// 获取分布式锁并执行(非阻塞。加锁失败直接返回(false,null))
         /// </summary>
-        /// <param name="del">获取锁成功时执行的业务方法</param>
         /// <param name="key">要锁定的key</param>
-        /// <param name="value">锁定的value，获取锁时赋值value，在解锁时必须是同一个value的客户端才能解锁</param>
-        /// <param name="expiryMillisecond">超时时间</param>
+        /// <param name="value">锁定的value，加锁时赋值value，在解锁时必须是同一个value的客户端才能解锁</param>
+        /// <param name="del">加锁成功时执行的业务方法</param>
+        /// <param name="expiry">锁超时时间(ms)</param>
         /// <param name="args">业务方法参数</param>
         /// <returns>(success,return value of the del)</returns>
         public async Task<(bool, object)> LockExecuteAsync(string key, string value, Delegate del,
-            int expiryMillisecond = 3000, params object[] args
-        )
+            int expiry = 3000, params object[] args)
         {
-            if (!await Db.LockTakeAsync(key, value, TimeSpan.FromMilliseconds(expiryMillisecond)))
+            if (!await Db.LockTakeAsync(key, value, TimeSpan.FromMilliseconds(expiry)))
                 return (false, null);
 
             try
@@ -216,6 +222,117 @@ namespace ColinChang.RedisHelper
             finally
             {
                 Db.LockRelease(key, value);
+            }
+        }
+
+        /// <summary>
+        /// 获取分布式锁并执行(阻塞。直到成功加锁或超时)
+        /// </summary>
+        /// <param name="key">要锁定的key</param>
+        /// <param name="value">锁定的value，加锁时赋值value，在解锁时必须是同一个value的客户端才能解锁</param>
+        /// <param name="del">加锁成功时执行的业务方法</param>
+        /// <param name="result">del返回值</param>
+        /// <param name="timeout">加锁超时时间(ms).0表示永不超时</param>
+        /// <param name="expiry">锁超时时间(ms)</param>
+        /// <param name="args">业务方法参数</param>
+        /// <returns>success</returns>
+        public bool LockExecute(string key, string value, Delegate del, out object result, int timeout = 0,
+            int expiry = 3000,
+            params object[] args)
+        {
+            result = null;
+            if (!GetLock(key, value, timeout, expiry))
+                return false;
+
+            try
+            {
+                result = del.DynamicInvoke(args);
+                return true;
+            }
+            finally
+            {
+                Db.LockRelease(key, value);
+            }
+        }
+
+        public bool LockExecute(string key, string value, Action action, int timeout = 0, int expiry = 3000)
+        {
+            return LockExecute(key, value, action, out var _, timeout, expiry);
+        }
+
+        public bool LockExecute<T>(string key, string value, Action<T> action, T arg, int timeout = 0,
+            int expiry = 3000)
+        {
+            return LockExecute(key, value, action, out var _, timeout, expiry, arg);
+        }
+
+        public bool LockExecute<T>(string key, string value, Func<T> func, out T result, int timeout = 0,
+            int expiry = 3000)
+            where T : class
+        {
+            result = null;
+            if (!GetLock(key, value, timeout, expiry))
+                return false;
+            try
+            {
+                result = func();
+                return true;
+            }
+            finally
+            {
+                Db.LockRelease(key, value);
+            }
+        }
+
+        public bool LockExecute<T, TResult>(string key, string value, Func<T, TResult> func, T arg, out TResult result,
+            int timeout = 0, int expiry = 3000)
+            where TResult : class
+        {
+            result = null;
+            if (!GetLock(key, value, timeout, expiry))
+                return false;
+            try
+            {
+                result = func(arg);
+                return true;
+            }
+            finally
+            {
+                Db.LockRelease(key, value);
+            }
+        }
+
+        private bool GetLock(string key, string value, int timeout, int expiry)
+        {
+            using (var waitHandle = new AutoResetEvent(false))
+            {
+                var timer = new Timer(1000);
+                timer.Start();
+                timer.Elapsed += (s, e) =>
+                {
+                    if (!Db.LockTake(key, value, TimeSpan.FromMilliseconds(expiry)))
+                        return;
+                    try
+                    {
+                        waitHandle.Set();
+                        timer.Stop();
+                    }
+                    catch
+                    {
+                    }
+                };
+
+
+                if (timeout > 0)
+                    waitHandle.WaitOne(timeout);
+                else
+                    waitHandle.WaitOne();
+
+                timer.Stop();
+                timer.Close();
+                timer.Dispose();
+
+                return Db.LockQuery(key) == value;
             }
         }
 
