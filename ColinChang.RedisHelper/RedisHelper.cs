@@ -179,24 +179,39 @@ namespace ColinChang.RedisHelper
                 batch.Execute();
             });
 
+        public async Task<bool> LockExecuteAsync(string key, string value, Action action,
+            int expiryMillisecond = 3000)
+        {
+            var (success, res) = await LockExecuteAsync(key, value, (Delegate) action, expiryMillisecond);
+            return success;
+        }
+
+        public async Task<bool> LockExecuteAsync<T>(string key, string value, Action action, T arg,
+            int expiryMillisecond = 3000)
+        {
+            var (success, res) = await LockExecuteAsync(key, value, action, expiryMillisecond, arg);
+            return success;
+        }
+
         /// <summary>
         /// 获取分布式锁并执行
         /// </summary>
-        /// <param name="action">获取锁成功时执行的业务方法</param>
+        /// <param name="del">获取锁成功时执行的业务方法</param>
         /// <param name="key">要锁定的key</param>
         /// <param name="value">锁定的value，获取锁时赋值value，在解锁时必须是同一个value的客户端才能解锁</param>
         /// <param name="expiryMillisecond">超时时间</param>
-        /// <returns></returns>
-        public async Task<bool> LockExecuteAsync(Action action, string key, string value,
-            int expiryMillisecond = 3000)
+        /// <param name="args">业务方法参数</param>
+        /// <returns>(success,return value of the del)</returns>
+        public async Task<(bool, object)> LockExecuteAsync(string key, string value, Delegate del,
+            int expiryMillisecond = 3000, params object[] args
+        )
         {
             if (!await Db.LockTakeAsync(key, value, TimeSpan.FromMilliseconds(expiryMillisecond)))
-                return false;
+                return (false, null);
 
             try
             {
-                action();
-                return true;
+                return (true, del.DynamicInvoke(args));
             }
             finally
             {

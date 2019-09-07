@@ -14,7 +14,7 @@ namespace ColinChang.RedisHelper.Test
         private readonly ITestOutputHelper _testOutputHelper;
 
         private readonly RedisHelper _redis =
-            new RedisHelper("127.0.0.1:6379,password=123123,connectTimeout=1000,connectRetry=1,syncTimeout=10000");
+            new RedisHelper("127.0.0.1:6379,connectTimeout=1000,connectRetry=1,syncTimeout=10000");
 
         public RedisHelperTest(ITestOutputHelper testOutputHelper)
         {
@@ -181,15 +181,24 @@ namespace ColinChang.RedisHelper.Test
         [Fact]
         public async Task LockExecuteTestAsync()
         {
-            Action action = () => _testOutputHelper.WriteLine(Thread.CurrentThread.ManagedThreadId.ToString());
             var key = "lockTest";
 
             for (var i = 0; i < 10; i++)
             {
-                //模拟多进程
                 ThreadPool.QueueUserWorkItem(async state =>
-                    _testOutputHelper.WriteLine((await _redis.LockExecuteAsync(action, key, Guid.NewGuid().ToString()))
-                        .ToString()));
+                {
+                    var (success, res) = await _redis.LockExecuteAsync(key,
+                        Guid.NewGuid().ToString(),
+                        new Func<int, int, int>((a, b) => a + b),
+                        3000,
+                        1, 2
+                    );
+                    if (success)
+                    {
+                        _testOutputHelper.WriteLine($"{Thread.CurrentThread.ManagedThreadId.ToString()} get the lock");
+                        _testOutputHelper.WriteLine($"result is {res}");
+                    }
+                });
             }
 
             await Task.Delay(3000);
