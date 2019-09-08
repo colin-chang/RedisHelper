@@ -206,13 +206,13 @@ namespace ColinChang.RedisHelper
         /// <param name="key">要锁定的key</param>
         /// <param name="value">锁定的value，加锁时赋值value，在解锁时必须是同一个value的客户端才能解锁</param>
         /// <param name="del">加锁成功时执行的业务方法</param>
-        /// <param name="expiry">锁超时时间(ms)</param>
+        /// <param name="expiry">持锁超时时间。超时后锁自动释放</param>
         /// <param name="args">业务方法参数</param>
         /// <returns>(success,return value of the del)</returns>
         public async Task<(bool, object)> LockExecuteAsync(string key, string value, Delegate del,
-            int expiry = 3000, params object[] args)
+            TimeSpan expiry, params object[] args)
         {
-            if (!await Db.LockTakeAsync(key, value, TimeSpan.FromMilliseconds(expiry)))
+            if (!await Db.LockTakeAsync(key, value, expiry))
                 return (false, null);
 
             try
@@ -232,16 +232,15 @@ namespace ColinChang.RedisHelper
         /// <param name="value">锁定的value，加锁时赋值value，在解锁时必须是同一个value的客户端才能解锁</param>
         /// <param name="del">加锁成功时执行的业务方法</param>
         /// <param name="result">del返回值</param>
+        /// <param name="expiry">持锁超时时间。超时后锁自动释放</param>
         /// <param name="timeout">加锁超时时间(ms).0表示永不超时</param>
-        /// <param name="expiry">锁超时时间(ms)</param>
         /// <param name="args">业务方法参数</param>
         /// <returns>success</returns>
-        public bool LockExecute(string key, string value, Delegate del, out object result, int timeout = 0,
-            int expiry = 3000,
-            params object[] args)
+        public bool LockExecute(string key, string value, Delegate del, out object result, TimeSpan expiry,
+            int timeout = 0, params object[] args)
         {
             result = null;
-            if (!GetLock(key, value, timeout, expiry))
+            if (!GetLock(key, value, expiry, timeout))
                 return false;
 
             try
@@ -255,23 +254,22 @@ namespace ColinChang.RedisHelper
             }
         }
 
-        public bool LockExecute(string key, string value, Action action, int timeout = 0, int expiry = 3000)
+        public bool LockExecute(string key, string value, Action action, TimeSpan expiry, int timeout = 0)
         {
-            return LockExecute(key, value, action, out var _, timeout, expiry);
+            return LockExecute(key, value, action, out var _, expiry, timeout);
         }
 
-        public bool LockExecute<T>(string key, string value, Action<T> action, T arg, int timeout = 0,
-            int expiry = 3000)
+        public bool LockExecute<T>(string key, string value, Action<T> action, T arg, TimeSpan expiry, int timeout = 0)
         {
-            return LockExecute(key, value, action, out var _, timeout, expiry, arg);
+            return LockExecute(key, value, action, out var _, expiry, timeout, arg);
         }
 
-        public bool LockExecute<T>(string key, string value, Func<T> func, out T result, int timeout = 0,
-            int expiry = 3000)
+        public bool LockExecute<T>(string key, string value, Func<T> func, out T result, TimeSpan expiry,
+            int timeout = 0)
             where T : class
         {
             result = null;
-            if (!GetLock(key, value, timeout, expiry))
+            if (!GetLock(key, value, expiry, timeout))
                 return false;
             try
             {
@@ -285,11 +283,11 @@ namespace ColinChang.RedisHelper
         }
 
         public bool LockExecute<T, TResult>(string key, string value, Func<T, TResult> func, T arg, out TResult result,
-            int timeout = 0, int expiry = 3000)
+            TimeSpan expiry, int timeout = 0)
             where TResult : class
         {
             result = null;
-            if (!GetLock(key, value, timeout, expiry))
+            if (!GetLock(key, value, expiry, timeout))
                 return false;
             try
             {
@@ -302,7 +300,7 @@ namespace ColinChang.RedisHelper
             }
         }
 
-        private bool GetLock(string key, string value, int timeout, int expiry)
+        private bool GetLock(string key, string value, TimeSpan expiry, int timeout)
         {
             using (var waitHandle = new AutoResetEvent(false))
             {
@@ -310,7 +308,7 @@ namespace ColinChang.RedisHelper
                 timer.Start();
                 timer.Elapsed += (s, e) =>
                 {
-                    if (!Db.LockTake(key, value, TimeSpan.FromMilliseconds(expiry)))
+                    if (!Db.LockTake(key, value, expiry))
                         return;
                     try
                     {

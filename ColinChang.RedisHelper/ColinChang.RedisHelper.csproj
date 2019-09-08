@@ -9,19 +9,21 @@
     <RepositoryType>Git</RepositoryType>
     <PackageTags>redis redis.net redis.driver redis.helper redis.net.core</PackageTags>
     <Description>This is a common redis helper based on StackExchange.Redis.</Description>
-    <AssemblyVersion>1.0.3.0</AssemblyVersion>
-    <FileVersion>1.0.2.0</FileVersion>
-    <PackageReleaseNotes>Add 2 methods below
-1. GetAllKeys
-2. KeyExistsAsync</PackageReleaseNotes>
-    <Version>1.0.3</Version>
+    <AssemblyVersion>1.1.2.0</AssemblyVersion>
+    <FileVersion>1.1.2.0</FileVersion>
+    <PackageReleaseNotes>1.update expire datetype of method "LockExecute"
+2.update the dependencies</PackageReleaseNotes>
+    <Version>1.1.0</Version>
     <PackageIconUrl>https://raw.githubusercontent.com/colin-chang/RedisHelper/master/redis.ico</PackageIconUrl>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <PackageVersion>1.1.2</PackageVersion>
+    <Title>ColinChang.RedisHelper</Title>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Newtonsoft.Json" Version="12.0.1" />
-    <PackageReference Include="StackExchange.Redis" Version="2.0.571" />
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.2" />
+    <PackageReference Include="StackExchange.Redis" Version="2.0.601" />
   </ItemGroup>
 
   <ItemGroup>

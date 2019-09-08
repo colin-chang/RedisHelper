@@ -14,7 +14,7 @@ namespace ColinChang.RedisHelper.Test
         private readonly ITestOutputHelper _testOutputHelper;
 
         private readonly RedisHelper _redis =
-            new RedisHelper("127.0.0.1:6379,connectTimeout=1000,connectRetry=1,syncTimeout=10000");
+            new RedisHelper("192.168.0.200:6379,password=x~y!s@m#a$r%t^c&l*a(s)s_r+d,connectTimeout=1000,connectRetry=1,syncTimeout=10000");
 
         public RedisHelperTest(ITestOutputHelper testOutputHelper)
         {
@@ -191,7 +191,7 @@ namespace ColinChang.RedisHelper.Test
                     var (success, res) = await _redis.LockExecuteAsync(key,
                         Guid.NewGuid().ToString(),
                         new Func<int, int, int>((a, b) => a + b),
-                        3000,
+                        TimeSpan.FromSeconds(10),
                         1, 2
                     );
                     if (success)
