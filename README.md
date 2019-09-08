@@ -14,7 +14,7 @@ dotnet add package ColinChang.RedisHelper
 * Data types:`String,List,Set,SortedSet,Hash`
 * Pub/Sub
 * Path commands
-* Distrubution lock
+* Distrubution lock(sync/async)
 
 **Tips**
 we highly recommend that use this as a singleton instance to reuse the redis connection.
