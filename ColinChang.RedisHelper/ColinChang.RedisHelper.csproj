@@ -8,17 +8,16 @@
     <RepositoryUrl>https://github.com/colin-chang/RedisHelper</RepositoryUrl>
     <RepositoryType>Git</RepositoryType>
     <PackageTags>redis redis.net redis.driver redis.helper redis.net.core</PackageTags>
-    <Description>This is a common redis helper based on StackExchange.Redis.</Description>
+    <Description>a common redis helper based on StackExchange.Redis.</Description>
     <AssemblyVersion>1.1.2.0</AssemblyVersion>
     <FileVersion>1.1.2.0</FileVersion>
-    <PackageReleaseNotes>1.update expire datetype of method "LockExecute"
-2.update the dependencies</PackageReleaseNotes>
+    <PackageReleaseNotes>update lockexecute to be generic</PackageReleaseNotes>
     <Version>1.1.0</Version>
     <PackageIconUrl>https://raw.githubusercontent.com/colin-chang/RedisHelper/master/redis.ico</PackageIconUrl>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <PackageVersion>1.1.2</PackageVersion>
-    <Title>ColinChang.RedisHelper</Title>
+    <PackageVersion>1.1.3</PackageVersion>
+    <Title>RedisHelper</Title>
   </PropertyGroup>
 
   <ItemGroup>

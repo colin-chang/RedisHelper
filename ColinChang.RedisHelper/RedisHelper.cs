@@ -266,9 +266,8 @@ namespace ColinChang.RedisHelper
 
         public bool LockExecute<T>(string key, string value, Func<T> func, out T result, TimeSpan expiry,
             int timeout = 0)
-            where T : class
         {
-            result = null;
+            result = default;
             if (!GetLock(key, value, expiry, timeout))
                 return false;
             try
@@ -284,9 +283,8 @@ namespace ColinChang.RedisHelper
 
         public bool LockExecute<T, TResult>(string key, string value, Func<T, TResult> func, T arg, out TResult result,
             TimeSpan expiry, int timeout = 0)
-            where TResult : class
         {
-            result = null;
+            result = default;
             if (!GetLock(key, value, expiry, timeout))
                 return false;
             try
