@@ -337,26 +337,50 @@ namespace ColinChang.RedisHelper
 
     public static class StackExchangeRedisExtension
     {
-        public static IEnumerable<string> ToStrings(this IEnumerable<RedisKey> keys) => keys.Select(k => (string) k);
+        public static IEnumerable<string> ToStrings(this IEnumerable<RedisKey> keys)
+        {
+            var redisKeys = keys as RedisKey[] ?? keys.ToArray();
+            return !redisKeys.Any() ? null : redisKeys.Select(k => (string)k);
+        }
 
-        public static RedisValue ToRedisValue<T>(this T value) =>
-            value is ValueType || value is string
-                ? value.ToString()
+        public static RedisValue ToRedisValue<T>(this T value)
+        {
+            if (value == null)
+                return RedisValue.Null;
+
+            return value is ValueType || value is string
+                ? value as string
                 : JsonConvert.SerializeObject(value);
+        }
 
 
-        public static RedisValue[] ToRedisValues<T>(this IEnumerable<T> values) =>
-            values.Select(v => v.ToRedisValue()).ToArray();
+        public static RedisValue[] ToRedisValues<T>(this IEnumerable<T> values)
+        {
+            var enumerable = values as T[] ?? values.ToArray();
+            return !enumerable.Any() ? null : enumerable.Select(v => v.ToRedisValue()).ToArray();
+        }
 
-        public static T ToObject<T>(this RedisValue value) where T : class => typeof(T) == typeof(string)
-            ? value.ToString() as T
-            : JsonConvert.DeserializeObject<T>(value.ToString());
+        public static T ToObject<T>(this RedisValue value) where T : class
+        {
+            if (value == RedisValue.Null)
+                return null;
 
-        public static IEnumerable<T> ToObjects<T>(this IEnumerable<RedisValue> values) where T : class =>
-            values.Select(v => v.ToObject<T>());
+            return typeof(T) == typeof(string)
+                ? value.ToString() as T
+                : JsonConvert.DeserializeObject<T>(value.ToString());
+        }
+
+        public static IEnumerable<T> ToObjects<T>(this IEnumerable<RedisValue> values) where T : class
+        {
+            var redisValues = values as RedisValue[] ?? values.ToArray();
+            return !redisValues.Any() ? null : redisValues.Select(v => v.ToObject<T>());
+        }
 
         public static HashEntry[] ToHashEntries(this Dictionary<string, string> entries)
         {
+            if (entries == null || !entries.Any())
+                return null;
+
             var es = new HashEntry[entries.Count];
             for (var i = 0; i < entries.Count; i++)
             {
@@ -370,8 +394,12 @@ namespace ColinChang.RedisHelper
 
         public static Dictionary<string, string> ToDictionary(this IEnumerable<HashEntry> entries)
         {
+            var hashEntries = entries as HashEntry[] ?? entries.ToArray();
+            if (!hashEntries.Any())
+                return null;
+
             var dict = new Dictionary<string, string>();
-            foreach (var entry in entries)
+            foreach (var entry in hashEntries)
                 dict[entry.Name] = entry.Value;
 
             return dict;
@@ -379,17 +407,24 @@ namespace ColinChang.RedisHelper
 
         public static Dictionary<string, string> ToDictionary(this RedisValue[] hashValues, IEnumerable<string> fields)
         {
+            var enumerable = fields as string[] ?? fields.ToArray();
+            if (hashValues == null || !hashValues.Any() || !enumerable.Any())
+                return null;
+
             var dict = new Dictionary<string, string>();
-            for (var i = 0; i < fields.Count(); i++)
-                dict[fields.ElementAt(i)] = hashValues[i];
+            for (var i = 0; i < enumerable.Count(); i++)
+                dict[enumerable.ElementAt(i)] = hashValues[i];
 
             return dict;
         }
 
         public static Dictionary<string, double> ToDictionary(this IEnumerable<SortedSetEntry> entries)
         {
+            var sortedSetEntries = entries as SortedSetEntry[] ?? entries.ToArray();
+            if (!sortedSetEntries.Any())
+                return null;
             var dict = new Dictionary<string, double>();
-            foreach (var entry in entries)
+            foreach (var entry in sortedSetEntries)
                 dict[entry.Element] = entry.Score;
 
             return dict;
