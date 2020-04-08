@@ -116,11 +116,18 @@ namespace ColinChang.RedisHelper
         public async Task<Dictionary<string, string>> HashGetFieldsAsync(string key, IEnumerable<string> fields) =>
             (await Db.HashGetAsync(key, fields.ToRedisValues())).ToDictionary(fields);
 
-        public async Task HashSetAsync(string key, Dictionary<string, string> entries) =>
-            await Db.HashSetAsync(key, entries.ToHashEntries());
+        public async Task HashSetAsync(string key, Dictionary<string, string> entries)
+        {
+            var val = entries.ToHashEntries();
+            if (val != null)
+                await Db.HashSetAsync(key, val);
+        }
 
         public async Task HashSetFieldsAsync(string key, Dictionary<string, string> fields)
         {
+            if (fields == null || !fields.Any())
+                return;
+
             var hs = await HashGetAsync(key);
             foreach (var field in fields)
                 hs[field.Key] = field.Value;
@@ -129,10 +136,13 @@ namespace ColinChang.RedisHelper
         }
 
         public async Task<bool> HashDeleteAsync(string key) =>
-            await KeyDeleteAsync(new string[] {key}) > 0;
+            await KeyDeleteAsync(new string[] { key }) > 0;
 
         public async Task<bool> HashDeleteFieldsAsync(string key, IEnumerable<string> fields)
         {
+            if (fields == null || !fields.Any())
+                return false;
+
             foreach (var field in fields)
                 if (!await Db.HashDeleteAsync(key, field))
                     return false;
@@ -160,7 +170,7 @@ namespace ColinChang.RedisHelper
         /// <param name="keys">待删除的key集合</param>
         /// <returns>删除key的数量</returns>
         public async Task<long> KeyDeleteAsync(IEnumerable<string> keys) =>
-            await Db.KeyDeleteAsync(keys.Select(k => (RedisKey) k).ToArray());
+            await Db.KeyDeleteAsync(keys.Select(k => (RedisKey)k).ToArray());
 
         /// <summary>
         /// 设置指定key过期时间
