@@ -1,5 +1,5 @@
 # RedisHelper
-This is a redis operation utility based on StackExchange.Redis.It's built for.Net Standard 2.0.
+This is a redis operation utility based on StackExchange.Redis.It's built for.Net Standard 2.1
 
 **[Nuget](https://www.nuget.org/packages/ColinChang.RedisHelper/)**
 ```sh
