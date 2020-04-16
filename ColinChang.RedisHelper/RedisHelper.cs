@@ -143,11 +143,14 @@ namespace ColinChang.RedisHelper
             if (fields == null || !fields.Any())
                 return false;
 
+            var success = true;
             foreach (var field in fields)
+            {
                 if (!await Db.HashDeleteAsync(key, field))
-                    return false;
+                    success = false;
+            }
 
-            return true;
+            return success;
         }
 
         #endregion

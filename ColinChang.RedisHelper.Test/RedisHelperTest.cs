@@ -110,7 +110,8 @@ namespace ColinChang.RedisHelper.Test
                 ["name"] = "colin",
                 ["age"] = "18"
             });
-            Assert.True(await _redis.HashDeleteFieldsAsync(key, new string[] { "name" }));
+
+            Assert.True(await _redis.HashDeleteFieldsAsync(key, new string[] { "gender", "name" }));
 
             await _redis.HashSetFieldsAsync(key, new Dictionary<string, string>
             {
