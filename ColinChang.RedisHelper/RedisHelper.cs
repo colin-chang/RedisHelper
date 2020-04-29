@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -95,42 +96,48 @@ namespace ColinChang.RedisHelper
         /// <param name="stop"></param>
         /// <param name="order"></param>
         /// <returns></returns>
-        public async Task<Dictionary<string, double>> SortedSetRangeByRankWithScoresAsync(string key, long start = 0,
+        public async Task<ConcurrentDictionary<string, double>> SortedSetRangeByRankWithScoresAsync(string key, long start = 0,
             long stop = -1,
             Order order = Order.Ascending) =>
-            (await Db.SortedSetRangeByRankWithScoresAsync(key, start, stop, order)).ToDictionary();
+            (await Db.SortedSetRangeByRankWithScoresAsync(key, start, stop, order)).ToConcurrentDictionary();
 
-        public async Task<Dictionary<string, double>> SortedSetRangeByScoreWithScoresAsync(string key,
+        public async Task<ConcurrentDictionary<string, double>> SortedSetRangeByScoreWithScoresAsync(string key,
             double start = double.NegativeInfinity, double stop = double.PositiveInfinity,
             Exclude exclude = Exclude.None, Order order = Order.Ascending, long skip = 0, long take = -1) =>
             (await Db.SortedSetRangeByScoreWithScoresAsync(key, start, stop, exclude, order, skip, take))
-            .ToDictionary();
+            .ToConcurrentDictionary();
 
         #endregion
 
         #region Hash
 
-        public async Task<Dictionary<string, string>> HashGetAsync(string key) =>
-            (await Db.HashGetAllAsync(key)).ToDictionary();
+        public async Task<ConcurrentDictionary<string, string>> HashGetAsync(string key) =>
+            (await Db.HashGetAllAsync(key)).ToConcurrentDictionary();
 
-        public async Task<Dictionary<string, string>> HashGetFieldsAsync(string key, IEnumerable<string> fields) =>
-            (await Db.HashGetAsync(key, fields.ToRedisValues())).ToDictionary(fields);
+        public async Task<ConcurrentDictionary<string, string>> HashGetFieldsAsync(string key, IEnumerable<string> fields) =>
+            (await Db.HashGetAsync(key, fields.ToRedisValues())).ToConcurrentDictionary(fields);
 
-        public async Task HashSetAsync(string key, Dictionary<string, string> entries)
+        public async Task HashSetAsync(string key, ConcurrentDictionary<string, string> entries)
         {
             var val = entries.ToHashEntries();
             if (val != null)
                 await Db.HashSetAsync(key, val);
         }
 
-        public async Task HashSetFieldsAsync(string key, Dictionary<string, string> fields)
+        public async Task HashSetFieldsAsync(string key, ConcurrentDictionary<string, string> fields)
         {
             if (fields == null || !fields.Any())
                 return;
 
             var hs = await HashGetAsync(key);
             foreach (var field in fields)
+            {
+                //if(!hs.ContainsKey(field.Key))
+
+                //    continue;
+                    
                 hs[field.Key] = field.Value;
+            }
 
             await HashSetAsync(key, hs);
         }
@@ -389,7 +396,7 @@ namespace ColinChang.RedisHelper
             return !redisValues.Any() ? null : redisValues.Select(v => v.ToObject<T>());
         }
 
-        public static HashEntry[] ToHashEntries(this Dictionary<string, string> entries)
+        public static HashEntry[] ToHashEntries(this ConcurrentDictionary<string, string> entries)
         {
             if (entries == null || !entries.Any())
                 return null;
@@ -405,38 +412,39 @@ namespace ColinChang.RedisHelper
             return es;
         }
 
-        public static Dictionary<string, string> ToDictionary(this IEnumerable<HashEntry> entries)
+        public static ConcurrentDictionary<string, string> ToConcurrentDictionary(this IEnumerable<HashEntry> entries)
         {
             var hashEntries = entries as HashEntry[] ?? entries.ToArray();
             if (!hashEntries.Any())
                 return null;
 
-            var dict = new Dictionary<string, string>();
+            
+            var dict = new ConcurrentDictionary<string,string>();
             foreach (var entry in hashEntries)
                 dict[entry.Name] = entry.Value;
 
             return dict;
         }
 
-        public static Dictionary<string, string> ToDictionary(this RedisValue[] hashValues, IEnumerable<string> fields)
+        public static ConcurrentDictionary<string, string> ToConcurrentDictionary(this RedisValue[] hashValues, IEnumerable<string> fields)
         {
             var enumerable = fields as string[] ?? fields.ToArray();
             if (hashValues == null || !hashValues.Any() || !enumerable.Any())
                 return null;
 
-            var dict = new Dictionary<string, string>();
+            var dict = new ConcurrentDictionary<string, string>();
             for (var i = 0; i < enumerable.Count(); i++)
                 dict[enumerable.ElementAt(i)] = hashValues[i];
 
             return dict;
         }
 
-        public static Dictionary<string, double> ToDictionary(this IEnumerable<SortedSetEntry> entries)
+        public static ConcurrentDictionary<string, double> ToConcurrentDictionary(this IEnumerable<SortedSetEntry> entries)
         {
             var sortedSetEntries = entries as SortedSetEntry[] ?? entries.ToArray();
             if (!sortedSetEntries.Any())
                 return null;
-            var dict = new Dictionary<string, double>();
+            var dict = new ConcurrentDictionary<string, double>();
             foreach (var entry in sortedSetEntries)
                 dict[entry.Element] = entry.Score;
 
