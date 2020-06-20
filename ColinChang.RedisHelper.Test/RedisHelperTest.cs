@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -105,7 +106,7 @@ namespace ColinChang.RedisHelper.Test
         public async Task HashTestAsync()
         {
             const string key = "person";
-            await _redis.HashSetAsync(key, new Dictionary<string, string>
+            await _redis.HashSetAsync(key, new ConcurrentDictionary<string, string>
             {
                 ["name"] = "colin",
                 ["age"] = "18"
@@ -113,7 +114,7 @@ namespace ColinChang.RedisHelper.Test
 
             Assert.True(await _redis.HashDeleteFieldsAsync(key, new string[] { "gender", "name" }));
 
-            await _redis.HashSetFieldsAsync(key, new Dictionary<string, string>
+            await _redis.HashSetFieldsAsync(key, new ConcurrentDictionary<string, string>
             {
                 ["age"] = "20"
             });

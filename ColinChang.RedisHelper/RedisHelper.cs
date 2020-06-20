@@ -323,7 +323,6 @@ namespace ColinChang.RedisHelper
             using (var waitHandle = new AutoResetEvent(false))
             {
                 var timer = new Timer(1000);
-                timer.Start();
                 timer.Elapsed += (s, e) =>
                 {
                     if (!Db.LockTake(key, value, expiry))
@@ -337,6 +336,7 @@ namespace ColinChang.RedisHelper
                     {
                     }
                 };
+                timer.Start();
 
 
                 if (timeout > 0)
