@@ -14,13 +14,11 @@ namespace ColinChang.RedisHelper.Test
     {
         private readonly ITestOutputHelper _testOutputHelper;
 
-        private readonly RedisHelper _redis =
+        private readonly IRedisHelper _redis =
             new RedisHelper("192.168.0.202:6379,password=123123,connectTimeout=1000,connectRetry=1,syncTimeout=10000");
 
-        public RedisHelperTest(ITestOutputHelper testOutputHelper)
-        {
+        public RedisHelperTest(ITestOutputHelper testOutputHelper) =>
             _testOutputHelper = testOutputHelper;
-        }
 
         [Fact]
         public async Task StringTestAsync()
@@ -36,7 +34,7 @@ namespace ColinChang.RedisHelper.Test
             Assert.True(await _redis.StringSetAsync("person", people));
             Assert.Equal(people, await _redis.StringGetAsync<People>(objKey), new PeopleComparer());
 
-            Assert.Equal(2, await _redis.KeyDeleteAsync(new[] { key, objKey }));
+            Assert.Equal(2, await _redis.KeyDeleteAsync(new[] {key, objKey}));
         }
 
         [Fact]
@@ -67,7 +65,7 @@ namespace ColinChang.RedisHelper.Test
             foreach (var camera in cameras)
                 _testOutputHelper.WriteLine(camera);
 
-            Assert.Equal(2, await _redis.SetRemoveAsync(key, new[] { 0, 1 }));
+            Assert.Equal(2, await _redis.SetRemoveAsync(key, new[] {0, 1}));
         }
 
         [Fact]
@@ -99,7 +97,7 @@ namespace ColinChang.RedisHelper.Test
             foreach (var (k, v) in highScore)
                 _testOutputHelper.WriteLine($"{k}\t{v}");
 
-            await _redis.KeyDeleteAsync(new[] { key });
+            await _redis.KeyDeleteAsync(new[] {key});
         }
 
         [Fact]
@@ -112,14 +110,14 @@ namespace ColinChang.RedisHelper.Test
                 ["age"] = "18"
             });
 
-            Assert.True(await _redis.HashDeleteFieldsAsync(key, new string[] { "gender", "name" }));
+            Assert.True(await _redis.HashDeleteFieldsAsync(key, new string[] {"gender", "name"}));
 
             await _redis.HashSetFieldsAsync(key, new ConcurrentDictionary<string, string>
             {
                 ["age"] = "20"
             });
 
-            var dict = await _redis.HashGetFieldsAsync(key, new[] { "age" });
+            var dict = await _redis.HashGetFieldsAsync(key, new[] {"age"});
             Assert.Equal("20", dict["age"]);
 
             await _redis.HashDeleteAsync(key);
@@ -137,7 +135,7 @@ namespace ColinChang.RedisHelper.Test
             Assert.Equal("colin", await _redis.StringGetAsync<string>("name"));
             Assert.Equal("robin", (await _redis.SetMembersAsync<string>("guys")).FirstOrDefault());
 
-            await _redis.KeyDeleteAsync(new[] { "name", "guys" });
+            await _redis.KeyDeleteAsync(new[] {"name", "guys"});
         }
 
         [Fact]
@@ -189,18 +187,18 @@ namespace ColinChang.RedisHelper.Test
             for (var i = 0; i < 10; i++)
             {
                 new Thread(async () =>
-                {
-                    var (success, res) = await _redis.LockExecuteAsync(key,
-                        Guid.NewGuid().ToString(),
-                        new Func<int, int, int>((a, b) => a + b),
-                        TimeSpan.FromSeconds(10),
-                        1, 2
-                    );
-                    if (success)
-                        _testOutputHelper.WriteLine(
-                            $"thread-{Thread.CurrentThread.ManagedThreadId.ToString()} get the lock.result is {res}");
-                })
-                { IsBackground = true }.Start();
+                    {
+                        var (success, res) = await _redis.LockExecuteAsync(key,
+                            Guid.NewGuid().ToString(),
+                            new Func<int, int, int>((a, b) => a + b),
+                            TimeSpan.FromSeconds(10),
+                            1, 2
+                        );
+                        if (success)
+                            _testOutputHelper.WriteLine(
+                                $"thread-{Thread.CurrentThread.ManagedThreadId.ToString()} get the lock.result is {res}");
+                    })
+                    {IsBackground = true}.Start();
             }
 
             await Task.Delay(3000);

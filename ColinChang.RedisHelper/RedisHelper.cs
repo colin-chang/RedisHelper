@@ -1,48 +1,58 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 using StackExchange.Redis;
 using Newtonsoft.Json;
 using System.Net;
 using System.Threading;
+using Microsoft.Extensions.Options;
 using Timer = System.Timers.Timer;
 
 namespace ColinChang.RedisHelper
 {
-    public class RedisHelper
+    public class RedisHelper : IRedisHelper
     {
         private readonly ConnectionMultiplexer _conn;
-        public int DbNumber { get; set; } = -1;
+        private readonly IDatabase _db;
+
+        public RedisHelper(IOptions<RedisHelperOptions> options)
+        {
+            var connectionString = options.Value.ConnectionString;
+            _conn = ConnectionMultiplexer.Connect(connectionString);
+
+            var dbNumber = options.Value.DbNumber;
+            _db = _conn.GetDatabase(dbNumber);
+        }
 
         public RedisHelper(string connectionString) => _conn = ConnectionMultiplexer.Connect(connectionString);
 
-        private IDatabase Db => _conn.GetDatabase(DbNumber);
 
         #region String
 
         public async Task<bool> StringSetAsync<T>(string key, T value) =>
-            await Db.StringSetAsync(key, value.ToRedisValue());
+            await _db.StringSetAsync(key, value.ToRedisValue());
 
         public async Task<T> StringGetAsync<T>(string key) where T : class =>
-            (await Db.StringGetAsync(key)).ToObject<T>();
+            (await _db.StringGetAsync(key)).ToObject<T>();
 
         public async Task<double> StringIncrementAsync(string key, int value = 1) =>
-            await Db.StringIncrementAsync(key, value);
+            await _db.StringIncrementAsync(key, value);
 
         public async Task<double> StringDecrementAsync(string key, int value = 1) =>
-            await Db.StringDecrementAsync(key, value);
+            await _db.StringDecrementAsync(key, value);
 
         #endregion
 
         #region List
 
         public async Task<long> EnqueueAsync<T>(string key, T value) =>
-            await Db.ListRightPushAsync(key, value.ToRedisValue());
+            await _db.ListRightPushAsync(key, value.ToRedisValue());
 
         public async Task<T> DequeueAsync<T>(string key) where T : class =>
-            (await Db.ListLeftPopAsync(key)).ToObject<T>();
+            (await _db.ListLeftPopAsync(key)).ToObject<T>();
 
         /// <summary>
         /// 从队列中读取数据而不出队
@@ -54,39 +64,39 @@ namespace ColinChang.RedisHelper
         /// <returns>不指定 start、end 则获取所有数据</returns>
         public async Task<IEnumerable<T>> PeekRangeAsync<T>(string key, long start = 0, long stop = -1)
             where T : class =>
-            (await Db.ListRangeAsync(key, start, stop)).ToObjects<T>();
+            (await _db.ListRangeAsync(key, start, stop)).ToObjects<T>();
 
         #endregion
 
         #region Set
 
         public async Task<bool> SetAddAsync<T>(string key, T value) =>
-            await Db.SetAddAsync(key, value.ToRedisValue());
+            await _db.SetAddAsync(key, value.ToRedisValue());
 
         public async Task<long> SetRemoveAsync<T>(string key, IEnumerable<T> values) =>
-            await Db.SetRemoveAsync(key, values.ToRedisValues());
+            await _db.SetRemoveAsync(key, values.ToRedisValues());
 
         public async Task<IEnumerable<T>> SetMembersAsync<T>(string key) where T : class =>
-            (await Db.SetMembersAsync(key)).ToObjects<T>();
+            (await _db.SetMembersAsync(key)).ToObjects<T>();
 
         public async Task<bool> SetContainsAsync<T>(string key, T value) =>
-            await Db.SetContainsAsync(key, value.ToRedisValue());
+            await _db.SetContainsAsync(key, value.ToRedisValue());
 
         #endregion
 
         #region Sortedset
 
         public async Task<bool> SortedSetAddAsync(string key, string member, double score) =>
-            await Db.SortedSetAddAsync(key, member, score);
+            await _db.SortedSetAddAsync(key, member, score);
 
         public async Task<long> SortedSetRemoveAsync(string key, IEnumerable<string> members) =>
-            await Db.SortedSetRemoveAsync(key, members.ToRedisValues());
+            await _db.SortedSetRemoveAsync(key, members.ToRedisValues());
 
         public async Task<double> SortedSetIncrementAsync(string key, string member, double value) =>
-            await Db.SortedSetIncrementAsync(key, member, value);
+            await _db.SortedSetIncrementAsync(key, member, value);
 
         public async Task<double> SortedSetDecrementAsync(string key, string member, double value) =>
-            await Db.SortedSetDecrementAsync(key, member, value);
+            await _db.SortedSetDecrementAsync(key, member, value);
 
         /// <summary>
         /// 按序返回topN
@@ -96,15 +106,16 @@ namespace ColinChang.RedisHelper
         /// <param name="stop"></param>
         /// <param name="order"></param>
         /// <returns></returns>
-        public async Task<ConcurrentDictionary<string, double>> SortedSetRangeByRankWithScoresAsync(string key, long start = 0,
+        public async Task<ConcurrentDictionary<string, double>> SortedSetRangeByRankWithScoresAsync(string key,
+            long start = 0,
             long stop = -1,
             Order order = Order.Ascending) =>
-            (await Db.SortedSetRangeByRankWithScoresAsync(key, start, stop, order)).ToConcurrentDictionary();
+            (await _db.SortedSetRangeByRankWithScoresAsync(key, start, stop, order)).ToConcurrentDictionary();
 
         public async Task<ConcurrentDictionary<string, double>> SortedSetRangeByScoreWithScoresAsync(string key,
             double start = double.NegativeInfinity, double stop = double.PositiveInfinity,
             Exclude exclude = Exclude.None, Order order = Order.Ascending, long skip = 0, long take = -1) =>
-            (await Db.SortedSetRangeByScoreWithScoresAsync(key, start, stop, exclude, order, skip, take))
+            (await _db.SortedSetRangeByScoreWithScoresAsync(key, start, stop, exclude, order, skip, take))
             .ToConcurrentDictionary();
 
         #endregion
@@ -112,16 +123,17 @@ namespace ColinChang.RedisHelper
         #region Hash
 
         public async Task<ConcurrentDictionary<string, string>> HashGetAsync(string key) =>
-            (await Db.HashGetAllAsync(key)).ToConcurrentDictionary();
+            (await _db.HashGetAllAsync(key)).ToConcurrentDictionary();
 
-        public async Task<ConcurrentDictionary<string, string>> HashGetFieldsAsync(string key, IEnumerable<string> fields) =>
-            (await Db.HashGetAsync(key, fields.ToRedisValues())).ToConcurrentDictionary(fields);
+        public async Task<ConcurrentDictionary<string, string>> HashGetFieldsAsync(string key,
+            IEnumerable<string> fields) =>
+            (await _db.HashGetAsync(key, fields.ToRedisValues())).ToConcurrentDictionary(fields);
 
         public async Task HashSetAsync(string key, ConcurrentDictionary<string, string> entries)
         {
             var val = entries.ToHashEntries();
             if (val != null)
-                await Db.HashSetAsync(key, val);
+                await _db.HashSetAsync(key, val);
         }
 
         public async Task HashSetFieldsAsync(string key, ConcurrentDictionary<string, string> fields)
@@ -135,7 +147,7 @@ namespace ColinChang.RedisHelper
                 //if(!hs.ContainsKey(field.Key))
 
                 //    continue;
-                    
+
                 hs[field.Key] = field.Value;
             }
 
@@ -143,7 +155,7 @@ namespace ColinChang.RedisHelper
         }
 
         public async Task<bool> HashDeleteAsync(string key) =>
-            await KeyDeleteAsync(new string[] { key }) > 0;
+            await KeyDeleteAsync(new string[] {key}) > 0;
 
         public async Task<bool> HashDeleteFieldsAsync(string key, IEnumerable<string> fields)
         {
@@ -153,7 +165,7 @@ namespace ColinChang.RedisHelper
             var success = true;
             foreach (var field in fields)
             {
-                if (!await Db.HashDeleteAsync(key, field))
+                if (!await _db.HashDeleteAsync(key, field))
                     success = false;
             }
 
@@ -172,7 +184,7 @@ namespace ColinChang.RedisHelper
             _conn.GetServer(endPoint).Keys().ToStrings();
 
         public async Task<bool> KeyExistsAsync(string key) =>
-            await Db.KeyExistsAsync(key);
+            await _db.KeyExistsAsync(key);
 
         /// <summary>
         /// 删除给定Key
@@ -180,7 +192,7 @@ namespace ColinChang.RedisHelper
         /// <param name="keys">待删除的key集合</param>
         /// <returns>删除key的数量</returns>
         public async Task<long> KeyDeleteAsync(IEnumerable<string> keys) =>
-            await Db.KeyDeleteAsync(keys.Select(k => (RedisKey)k).ToArray());
+            await _db.KeyDeleteAsync(keys.Select(k => (RedisKey) k).ToArray());
 
         /// <summary>
         /// 设置指定key过期时间
@@ -188,9 +200,9 @@ namespace ColinChang.RedisHelper
         /// <param name="key"></param>
         /// <param name="expiry"></param>
         /// <returns></returns>
-        public async Task<bool> KeyExpireAsync(string key, TimeSpan? expiry) => await Db.KeyExpireAsync(key, expiry);
+        public async Task<bool> KeyExpireAsync(string key, TimeSpan? expiry) => await _db.KeyExpireAsync(key, expiry);
 
-        public async Task<bool> KeyExpireAsync(string key, DateTime? expiry) => await Db.KeyExpireAsync(key, expiry);
+        public async Task<bool> KeyExpireAsync(string key, DateTime? expiry) => await _db.KeyExpireAsync(key, expiry);
 
         #endregion
 
@@ -199,10 +211,8 @@ namespace ColinChang.RedisHelper
         public async Task<long> PublishAsync(string channel, string msg) =>
             await _conn.GetSubscriber().PublishAsync(channel, msg);
 
-        public async Task SubscribeAsync(string channel, Action<string, string> handler)
-        {
+        public async Task SubscribeAsync(string channel, Action<string, string> handler) =>
             await _conn.GetSubscriber().SubscribeAsync(channel, (chn, msg) => handler(chn, msg));
-        }
 
         /// <summary>
         /// 批量执行Redis操作
@@ -211,7 +221,7 @@ namespace ColinChang.RedisHelper
         public Task ExecuteBatchAsync(params Action[] operations) =>
             Task.Run(() =>
             {
-                var batch = Db.CreateBatch();
+                var batch = _db.CreateBatch();
 
                 foreach (var operation in operations)
                     operation();
@@ -232,7 +242,7 @@ namespace ColinChang.RedisHelper
         public async Task<(bool, object)> LockExecuteAsync(string key, string value, Delegate del,
             TimeSpan expiry, params object[] args)
         {
-            if (!await Db.LockTakeAsync(key, value, expiry))
+            if (!await _db.LockTakeAsync(key, value, expiry))
                 return (false, null);
 
             try
@@ -241,7 +251,7 @@ namespace ColinChang.RedisHelper
             }
             finally
             {
-                Db.LockRelease(key, value);
+                _db.LockRelease(key, value);
             }
         }
 
@@ -270,7 +280,7 @@ namespace ColinChang.RedisHelper
             }
             finally
             {
-                Db.LockRelease(key, value);
+                _db.LockRelease(key, value);
             }
         }
 
@@ -297,7 +307,7 @@ namespace ColinChang.RedisHelper
             }
             finally
             {
-                Db.LockRelease(key, value);
+                _db.LockRelease(key, value);
             }
         }
 
@@ -314,7 +324,7 @@ namespace ColinChang.RedisHelper
             }
             finally
             {
-                Db.LockRelease(key, value);
+                _db.LockRelease(key, value);
             }
         }
 
@@ -325,7 +335,7 @@ namespace ColinChang.RedisHelper
                 var timer = new Timer(1000);
                 timer.Elapsed += (s, e) =>
                 {
-                    if (!Db.LockTake(key, value, expiry))
+                    if (!_db.LockTake(key, value, expiry))
                         return;
                     try
                     {
@@ -348,7 +358,7 @@ namespace ColinChang.RedisHelper
                 timer.Close();
                 timer.Dispose();
 
-                return Db.LockQuery(key) == value;
+                return _db.LockQuery(key) == value;
             }
         }
 
@@ -360,7 +370,7 @@ namespace ColinChang.RedisHelper
         public static IEnumerable<string> ToStrings(this IEnumerable<RedisKey> keys)
         {
             var redisKeys = keys as RedisKey[] ?? keys.ToArray();
-            return !redisKeys.Any() ? null : redisKeys.Select(k => (string)k);
+            return !redisKeys.Any() ? null : redisKeys.Select(k => (string) k);
         }
 
         public static RedisValue ToRedisValue<T>(this T value)
@@ -418,15 +428,16 @@ namespace ColinChang.RedisHelper
             if (!hashEntries.Any())
                 return null;
 
-            
-            var dict = new ConcurrentDictionary<string,string>();
+
+            var dict = new ConcurrentDictionary<string, string>();
             foreach (var entry in hashEntries)
                 dict[entry.Name] = entry.Value;
 
             return dict;
         }
 
-        public static ConcurrentDictionary<string, string> ToConcurrentDictionary(this RedisValue[] hashValues, IEnumerable<string> fields)
+        public static ConcurrentDictionary<string, string> ToConcurrentDictionary(this RedisValue[] hashValues,
+            IEnumerable<string> fields)
         {
             var enumerable = fields as string[] ?? fields.ToArray();
             if (hashValues == null || !hashValues.Any() || !enumerable.Any())
@@ -439,7 +450,8 @@ namespace ColinChang.RedisHelper
             return dict;
         }
 
-        public static ConcurrentDictionary<string, double> ToConcurrentDictionary(this IEnumerable<SortedSetEntry> entries)
+        public static ConcurrentDictionary<string, double> ToConcurrentDictionary(
+            this IEnumerable<SortedSetEntry> entries)
         {
             var sortedSetEntries = entries as SortedSetEntry[] ?? entries.ToArray();
             if (!sortedSetEntries.Any())
