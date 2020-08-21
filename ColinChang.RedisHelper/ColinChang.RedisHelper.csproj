@@ -9,15 +9,15 @@
     <RepositoryType>Git</RepositoryType>
     <PackageTags>redis redis.net redis.driver redis.helper redis.net.core StackExchange redis.core</PackageTags>
     <Description>redis common helper based on StackExchange.Redis.It can help you to use the usual types in redis,including String,List,Set,SortedSet,Hash.It also supports Pub/Sub,Patch Commands,distribution lock.</Description>
-    <AssemblyVersion>1.2.4.0</AssemblyVersion>
-    <FileVersion>1.2.4.0</FileVersion>
-    <PackageReleaseNotes>update dependencies</PackageReleaseNotes>
-    <Version>1.2.4</Version>
+    <AssemblyVersion>1.2.5.0</AssemblyVersion>
+    <FileVersion>1.2.5.0</FileVersion>
+    <PackageReleaseNotes>update options validation</PackageReleaseNotes>
+    <Version>1.2.5</Version>
     <PackageIcon>icon.png</PackageIcon>
     <PackageIconUrl>https://raw.githubusercontent.com/colin-chang/RedisHelper/master/redis.ico</PackageIconUrl>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <PackageVersion>1.2.4</PackageVersion>
+    <PackageVersion>1.2.5</PackageVersion>
     <Title>RedisHelper</Title>
     <LangVersion>8</LangVersion>
   </PropertyGroup>

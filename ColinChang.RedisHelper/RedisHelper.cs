@@ -54,14 +54,6 @@ namespace ColinChang.RedisHelper
         public async Task<T> DequeueAsync<T>(string key) where T : class =>
             (await _db.ListLeftPopAsync(key)).ToObject<T>();
 
-        /// <summary>
-        /// 从队列中读取数据而不出队
-        /// </summary>
-        /// <param name="key"></param>
-        /// <param name="start">起始位置</param>
-        /// <param name="stop">结束位置</param>
-        /// <typeparam name="T">对象类型</typeparam>
-        /// <returns>不指定 start、end 则获取所有数据</returns>
         public async Task<IEnumerable<T>> PeekRangeAsync<T>(string key, long start = 0, long stop = -1)
             where T : class =>
             (await _db.ListRangeAsync(key, start, stop)).ToObjects<T>();
@@ -97,15 +89,7 @@ namespace ColinChang.RedisHelper
 
         public async Task<double> SortedSetDecrementAsync(string key, string member, double value) =>
             await _db.SortedSetDecrementAsync(key, member, value);
-
-        /// <summary>
-        /// 按序返回topN
-        /// </summary>
-        /// <param name="key"></param>
-        /// <param name="start"></param>
-        /// <param name="stop"></param>
-        /// <param name="order"></param>
-        /// <returns></returns>
+        
         public async Task<ConcurrentDictionary<string, double>> SortedSetRangeByRankWithScoresAsync(string key,
             long start = 0,
             long stop = -1,
@@ -186,20 +170,10 @@ namespace ColinChang.RedisHelper
         public async Task<bool> KeyExistsAsync(string key) =>
             await _db.KeyExistsAsync(key);
 
-        /// <summary>
-        /// 删除给定Key
-        /// </summary>
-        /// <param name="keys">待删除的key集合</param>
-        /// <returns>删除key的数量</returns>
         public async Task<long> KeyDeleteAsync(IEnumerable<string> keys) =>
             await _db.KeyDeleteAsync(keys.Select(k => (RedisKey) k).ToArray());
 
-        /// <summary>
-        /// 设置指定key过期时间
-        /// </summary>
-        /// <param name="key"></param>
-        /// <param name="expiry"></param>
-        /// <returns></returns>
+
         public async Task<bool> KeyExpireAsync(string key, TimeSpan? expiry) => await _db.KeyExpireAsync(key, expiry);
 
         public async Task<bool> KeyExpireAsync(string key, DateTime? expiry) => await _db.KeyExpireAsync(key, expiry);
@@ -213,11 +187,7 @@ namespace ColinChang.RedisHelper
 
         public async Task SubscribeAsync(string channel, Action<string, string> handler) =>
             await _conn.GetSubscriber().SubscribeAsync(channel, (chn, msg) => handler(chn, msg));
-
-        /// <summary>
-        /// 批量执行Redis操作
-        /// </summary>
-        /// <param name="operations"></param>
+        
         public Task ExecuteBatchAsync(params Action[] operations) =>
             Task.Run(() =>
             {
@@ -229,16 +199,7 @@ namespace ColinChang.RedisHelper
                 batch.Execute();
             });
 
-
-        /// <summary>
-        /// 获取分布式锁并执行(非阻塞。加锁失败直接返回(false,null))
-        /// </summary>
-        /// <param name="key">要锁定的key</param>
-        /// <param name="value">锁定的value，加锁时赋值value，在解锁时必须是同一个value的客户端才能解锁</param>
-        /// <param name="del">加锁成功时执行的业务方法</param>
-        /// <param name="expiry">持锁超时时间。超时后锁自动释放</param>
-        /// <param name="args">业务方法参数</param>
-        /// <returns>(success,return value of the del)</returns>
+        
         public async Task<(bool, object)> LockExecuteAsync(string key, string value, Delegate del,
             TimeSpan expiry, params object[] args)
         {
@@ -255,17 +216,7 @@ namespace ColinChang.RedisHelper
             }
         }
 
-        /// <summary>
-        /// 获取分布式锁并执行(阻塞。直到成功加锁或超时)
-        /// </summary>
-        /// <param name="key">要锁定的key</param>
-        /// <param name="value">锁定的value，加锁时赋值value，在解锁时必须是同一个value的客户端才能解锁</param>
-        /// <param name="del">加锁成功时执行的业务方法</param>
-        /// <param name="result">del返回值</param>
-        /// <param name="expiry">持锁超时时间。超时后锁自动释放</param>
-        /// <param name="timeout">加锁超时时间(ms).0表示永不超时</param>
-        /// <param name="args">业务方法参数</param>
-        /// <returns>success</returns>
+
         public bool LockExecute(string key, string value, Delegate del, out object result, TimeSpan expiry,
             int timeout = 0, params object[] args)
         {
