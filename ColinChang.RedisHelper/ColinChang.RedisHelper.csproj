@@ -14,7 +14,7 @@
     <PackageReleaseNotes>update options validation</PackageReleaseNotes>
     <Version>1.2.5</Version>
     <PackageIcon>icon.png</PackageIcon>
-    <PackageIconUrl>https://raw.githubusercontent.com/colin-chang/RedisHelper/master/redis.ico</PackageIconUrl>
+    <PackageIconUrl>https://raw.githubusercontent.com/colin-chang/RedisHelper/master/ColinChang.RedisHelper/icon.png</PackageIconUrl>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageVersion>1.2.5</PackageVersion>
