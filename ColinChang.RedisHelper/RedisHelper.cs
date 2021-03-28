@@ -18,16 +18,18 @@ namespace ColinChang.RedisHelper
         private readonly ConnectionMultiplexer _conn;
         private readonly IDatabase _db;
 
-        public RedisHelper(IOptions<RedisHelperOptions> options)
+        public RedisHelper(IOptionsMonitor<RedisHelperOptions> options) : this(options.CurrentValue)
         {
-            var connectionString = options.Value.ConnectionString;
-            _conn = ConnectionMultiplexer.Connect(connectionString);
-
-            var dbNumber = options.Value.DbNumber;
-            _db = _conn.GetDatabase(dbNumber);
         }
 
-        public RedisHelper(string connectionString) => _conn = ConnectionMultiplexer.Connect(connectionString);
+        public RedisHelper(RedisHelperOptions options)
+        {
+            var connectionString = options.ConnectionString;
+            _conn = ConnectionMultiplexer.Connect(connectionString);
+
+            var dbNumber = options.DbNumber;
+            _db = _conn.GetDatabase(dbNumber);
+        }
 
 
         #region String
@@ -89,7 +91,7 @@ namespace ColinChang.RedisHelper
 
         public async Task<double> SortedSetDecrementAsync(string key, string member, double value) =>
             await _db.SortedSetDecrementAsync(key, member, value);
-        
+
         public async Task<ConcurrentDictionary<string, double>> SortedSetRangeByRankWithScoresAsync(string key,
             long start = 0,
             long stop = -1,
@@ -187,7 +189,7 @@ namespace ColinChang.RedisHelper
 
         public async Task SubscribeAsync(string channel, Action<string, string> handler) =>
             await _conn.GetSubscriber().SubscribeAsync(channel, (chn, msg) => handler(chn, msg));
-        
+
         public Task ExecuteBatchAsync(params Action[] operations) =>
             Task.Run(() =>
             {
@@ -199,7 +201,7 @@ namespace ColinChang.RedisHelper
                 batch.Execute();
             });
 
-        
+
         public async Task<(bool, object)> LockExecuteAsync(string key, string value, Delegate del,
             TimeSpan expiry, params object[] args)
         {

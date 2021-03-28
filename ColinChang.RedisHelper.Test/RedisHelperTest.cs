@@ -10,15 +10,16 @@ using Xunit.Abstractions;
 
 namespace ColinChang.RedisHelper.Test
 {
-    public class RedisHelperTest
+    public class RedisHelperTest : IClassFixture<RedisHelperFixture>
     {
+        private readonly IRedisHelper _redis;
         private readonly ITestOutputHelper _testOutputHelper;
 
-        private readonly IRedisHelper _redis =
-            new RedisHelper("192.168.0.202:6379,password=123123,connectTimeout=1000,connectRetry=1,syncTimeout=10000");
-
-        public RedisHelperTest(ITestOutputHelper testOutputHelper) =>
+        public RedisHelperTest(RedisHelperFixture redis, ITestOutputHelper testOutputHelper)
+        {
             _testOutputHelper = testOutputHelper;
+            _redis = redis.Redis;
+        }
 
         [Fact]
         public async Task StringTestAsync()
@@ -110,7 +111,7 @@ namespace ColinChang.RedisHelper.Test
                 ["age"] = "18"
             });
 
-            Assert.True(await _redis.HashDeleteFieldsAsync(key, new string[] {"gender", "name"}));
+            Assert.True(await _redis.HashDeleteFieldsAsync(key, new[] {"gender", "name"}));
 
             await _redis.HashSetFieldsAsync(key, new ConcurrentDictionary<string, string>
             {
@@ -141,8 +142,8 @@ namespace ColinChang.RedisHelper.Test
         [Fact]
         public async Task KeyExpiryTestAsync()
         {
-            var key = "expirytest";
-            var value = "haha";
+            const string key = "expirytest";
+            const string value = "haha";
 
             await _redis.StringSetAsync(key, value);
             await _redis.KeyExpireAsync(key, TimeSpan.FromSeconds(3));
@@ -178,30 +179,43 @@ namespace ColinChang.RedisHelper.Test
         [Fact]
         public async Task LockExecuteTestAsync()
         {
-            var key = "lockTest";
-            var func = new Func<int, int, int>((a, b) =>
+            const string key = "lockTest";
+
+            var func = new Func<int, int, Task<int>>(async (a, b) =>
             {
-                Thread.Sleep(1000);
-                return a + b;
+                // _testOutputHelper.WriteLine(
+                //     $"thread-{Thread.CurrentThread.ManagedThreadId.ToString()} get the lock.");
+                await Task.Delay(1000);
+                return await Task.FromResult(a + b);
             });
-            for (var i = 0; i < 10; i++)
+
+            var rdm = new Random();
+            for (var i = 0; i < 3; i++)
             {
                 new Thread(async () =>
-                    {
-                        var (success, res) = await _redis.LockExecuteAsync(key,
-                            Guid.NewGuid().ToString(),
-                            new Func<int, int, int>((a, b) => a + b),
-                            TimeSpan.FromSeconds(10),
-                            1, 2
-                        );
-                        if (success)
-                            _testOutputHelper.WriteLine(
-                                $"thread-{Thread.CurrentThread.ManagedThreadId.ToString()} get the lock.result is {res}");
-                    })
-                    {IsBackground = true}.Start();
+                        {
+                            var success = _redis.LockExecute(key, Guid.NewGuid().ToString(), func,
+                                out var result,
+                                TimeSpan.MaxValue,
+                                3000, rdm.Next(0, 10), 0);
+
+                            if (success)
+                            {
+                                var res = await (result as Task<int>);
+                                _testOutputHelper.WriteLine(
+                                    $"result is {res}.\t{DateTime.Now.ToLongTimeString()}");
+                            }
+                            else
+                                _testOutputHelper.WriteLine(
+                                    $"failed to get lock.\t{DateTime.Now.ToLongTimeString()}");
+                        })
+                        {IsBackground = true}
+                    .Start();
+                await Task.Delay(500);
             }
 
-            await Task.Delay(3000);
+            await Task.Delay(5000);
+            _testOutputHelper.WriteLine("all done");
         }
     }
 
@@ -223,5 +237,14 @@ namespace ColinChang.RedisHelper.Test
         public bool Equals(People x, People y) => x.Name == y.Name && x.Age == y.Age;
 
         public int GetHashCode(People obj) => obj.GetHashCode();
+    }
+
+    public class RedisHelperFixture
+    {
+        public IRedisHelper Redis { get; }
+
+        public RedisHelperFixture() =>
+            Redis = new RedisHelper(new RedisHelperOptions(
+                "192.168.0.203:6379,password=123123,connectTimeout=1000,connectRetry=1,syncTimeout=10000", 0));
     }
 }

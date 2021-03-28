@@ -3,23 +3,21 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
     <Authors>Colin Chang</Authors>
-    <Copyright>https://ccstudio.org</Copyright>
+    <Copyright>https://ccstudio.com.cn,</Copyright>
     <PackageProjectUrl>https://github.com/colin-chang/RedisHelper</PackageProjectUrl>
     <RepositoryUrl>https://github.com/colin-chang/RedisHelper</RepositoryUrl>
     <RepositoryType>Git</RepositoryType>
     <PackageTags>redis redis.net redis.driver redis.helper redis.net.core StackExchange redis.core</PackageTags>
     <Description>redis common helper based on StackExchange.Redis.It can help you to use the usual types in redis,including String,List,Set,SortedSet,Hash.It also supports Pub/Sub,Patch Commands,distribution lock.</Description>
-    <AssemblyVersion>1.2.5.0</AssemblyVersion>
-    <FileVersion>1.2.5.0</FileVersion>
-    <PackageReleaseNotes>update options validation</PackageReleaseNotes>
-    <Version>1.2.5</Version>
+    <PackageReleaseNotes>1.update constructors 2.update dependencies</PackageReleaseNotes>
+    <Version>1.2.6</Version>
+    <PackageVersion>1.2.6</PackageVersion>
     <PackageIcon>icon.png</PackageIcon>
-    <PackageIconUrl>https://raw.githubusercontent.com/colin-chang/RedisHelper/master/ColinChang.RedisHelper/icon.png</PackageIconUrl>
+    <PackageIconUrl>https://raw.githubusercontent.com/colin-chang/RedisHelper/main/icon.png</PackageIconUrl>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <PackageVersion>1.2.5</PackageVersion>
     <Title>RedisHelper</Title>
-    <LangVersion>8</LangVersion>
+    <LangVersion>default</LangVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
@@ -27,12 +25,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="3.1.7" />
-    <PackageReference Include="Microsoft.Extensions.Options" Version="3.1.7" />
-    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="3.1.7" />
-    <PackageReference Include="Microsoft.Extensions.Options.DataAnnotations" Version="3.1.7" />
-    <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
-    <PackageReference Include="StackExchange.Redis" Version="2.1.58" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="5.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Options" Version="5.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="5.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Options.DataAnnotations" Version="5.0.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+    <PackageReference Include="StackExchange.Redis" Version="2.2.4" />
   </ItemGroup>
 
   <ItemGroup>
@@ -40,6 +38,6 @@
       <Pack>True</Pack>
       <PackagePath></PackagePath>
     </None>
-    <None Include="icon.png" Pack="true" PackagePath="" />
+    <None Include="..\icon.png" Pack="true" PackagePath="" />
   </ItemGroup>
 </Project>
