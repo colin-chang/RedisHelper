@@ -1,13 +1,15 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.26124.0
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31808.319
 MinimumVisualStudioVersion = 15.0.26124.0
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ColinChang.RedisHelper", "ColinChang.RedisHelper\ColinChang.RedisHelper.csproj", "{DDBF328E-F301-4D26-9E0C-6BAAD96F8B52}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ColinChang.RedisHelper", "ColinChang.RedisHelper\ColinChang.RedisHelper.csproj", "{DDBF328E-F301-4D26-9E0C-6BAAD96F8B52}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ColinChang.RedisHelper.Test", "ColinChang.RedisHelper.Test\ColinChang.RedisHelper.Test.csproj", "{DE65275C-5DA0-4BAC-9A76-6B5568187DCE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ColinChang.RedisHelper.Test", "ColinChang.RedisHelper.Test\ColinChang.RedisHelper.Test.csproj", "{DE65275C-5DA0-4BAC-9A76-6B5568187DCE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ColinChang.RedisHelper.Sample", "ColinChang.RedisHelper.Sample\ColinChang.RedisHelper.Sample.csproj", "{DC3F7A2A-F120-4395-B567-AA4B24DDD974}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ColinChang.RedisHelper.Sample", "ColinChang.RedisHelper.Sample\ColinChang.RedisHelper.Sample.csproj", "{DC3F7A2A-F120-4395-B567-AA4B24DDD974}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ColinChang.RedisHelper.Abp", "ColinChang.RedisHelper.Abp\ColinChang.RedisHelper.Abp.csproj", "{30CEC9DD-6BC5-4C83-B239-18EBFA9E9A84}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -18,10 +20,9 @@ Global
 		Release|x64 = Release|x64
 		Release|x86 = Release|x86
 	EndGlobalSection
-	GlobalSection(SolutionProperties) = preSolution
-		HideSolutionNode = FALSE
-	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{DDBF328E-F301-4D26-9E0C-6BAAD96F8B52}.Debug|Any CPU.ActiveCfg = Release|Any CPU
+		{DDBF328E-F301-4D26-9E0C-6BAAD96F8B52}.Debug|Any CPU.Build.0 = Release|Any CPU
 		{DDBF328E-F301-4D26-9E0C-6BAAD96F8B52}.Debug|x64.ActiveCfg = Debug|Any CPU
 		{DDBF328E-F301-4D26-9E0C-6BAAD96F8B52}.Debug|x64.Build.0 = Debug|Any CPU
 		{DDBF328E-F301-4D26-9E0C-6BAAD96F8B52}.Debug|x86.ActiveCfg = Debug|Any CPU
@@ -32,8 +33,6 @@ Global
 		{DDBF328E-F301-4D26-9E0C-6BAAD96F8B52}.Release|x64.Build.0 = Release|Any CPU
 		{DDBF328E-F301-4D26-9E0C-6BAAD96F8B52}.Release|x86.ActiveCfg = Release|Any CPU
 		{DDBF328E-F301-4D26-9E0C-6BAAD96F8B52}.Release|x86.Build.0 = Release|Any CPU
-		{DDBF328E-F301-4D26-9E0C-6BAAD96F8B52}.Debug|Any CPU.ActiveCfg = Release|Any CPU
-		{DDBF328E-F301-4D26-9E0C-6BAAD96F8B52}.Debug|Any CPU.Build.0 = Release|Any CPU
 		{DE65275C-5DA0-4BAC-9A76-6B5568187DCE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{DE65275C-5DA0-4BAC-9A76-6B5568187DCE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DE65275C-5DA0-4BAC-9A76-6B5568187DCE}.Debug|x64.ActiveCfg = Debug|Any CPU
@@ -58,5 +57,23 @@ Global
 		{DC3F7A2A-F120-4395-B567-AA4B24DDD974}.Release|x64.Build.0 = Release|Any CPU
 		{DC3F7A2A-F120-4395-B567-AA4B24DDD974}.Release|x86.ActiveCfg = Release|Any CPU
 		{DC3F7A2A-F120-4395-B567-AA4B24DDD974}.Release|x86.Build.0 = Release|Any CPU
+		{30CEC9DD-6BC5-4C83-B239-18EBFA9E9A84}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{30CEC9DD-6BC5-4C83-B239-18EBFA9E9A84}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{30CEC9DD-6BC5-4C83-B239-18EBFA9E9A84}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{30CEC9DD-6BC5-4C83-B239-18EBFA9E9A84}.Debug|x64.Build.0 = Debug|Any CPU
+		{30CEC9DD-6BC5-4C83-B239-18EBFA9E9A84}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{30CEC9DD-6BC5-4C83-B239-18EBFA9E9A84}.Debug|x86.Build.0 = Debug|Any CPU
+		{30CEC9DD-6BC5-4C83-B239-18EBFA9E9A84}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{30CEC9DD-6BC5-4C83-B239-18EBFA9E9A84}.Release|Any CPU.Build.0 = Release|Any CPU
+		{30CEC9DD-6BC5-4C83-B239-18EBFA9E9A84}.Release|x64.ActiveCfg = Release|Any CPU
+		{30CEC9DD-6BC5-4C83-B239-18EBFA9E9A84}.Release|x64.Build.0 = Release|Any CPU
+		{30CEC9DD-6BC5-4C83-B239-18EBFA9E9A84}.Release|x86.ActiveCfg = Release|Any CPU
+		{30CEC9DD-6BC5-4C83-B239-18EBFA9E9A84}.Release|x86.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {1052A95B-B89A-4A28-BF3A-928D8B726B60}
 	EndGlobalSection
 EndGlobal
