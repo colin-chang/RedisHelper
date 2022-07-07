@@ -25,8 +25,9 @@ namespace ColinChang.RedisHelper.Test
         public async Task StringTestAsync()
         {
             const string key = "name";
-            const string value = "colin";
-            Assert.True(await _redis.StringSetAsync(key, value));
+            const string value = "Colin";
+            Assert.True(await _redis.StringSetAsync<string>(key, value));
+            Assert.Equal(value, await _redis.StringGetAsync<string>(key));
             Assert.Equal(value, await _redis.StringGetAsync<string>(key));
             Assert.Null(await _redis.StringGetAsync<string>("not_exist"));
 
@@ -35,7 +36,7 @@ namespace ColinChang.RedisHelper.Test
             Assert.True(await _redis.StringSetAsync("person", people));
             Assert.Equal(people, await _redis.StringGetAsync<People>(objKey), new PeopleComparer());
 
-            Assert.Equal(2, await _redis.KeyDeleteAsync(new[] {key, objKey}));
+            Assert.Equal(2, await _redis.KeyDeleteAsync(new[] { key, objKey }));
         }
 
         [Fact]
@@ -66,7 +67,7 @@ namespace ColinChang.RedisHelper.Test
             foreach (var camera in cameras)
                 _testOutputHelper.WriteLine(camera);
 
-            Assert.Equal(2, await _redis.SetRemoveAsync(key, new[] {0, 1}));
+            Assert.Equal(2, await _redis.SetRemoveAsync(key, new[] { 0, 1 }));
         }
 
         [Fact]
@@ -98,7 +99,7 @@ namespace ColinChang.RedisHelper.Test
             foreach (var (k, v) in highScore)
                 _testOutputHelper.WriteLine($"{k}\t{v}");
 
-            await _redis.KeyDeleteAsync(new[] {key});
+            await _redis.KeyDeleteAsync(new[] { key });
         }
 
         [Fact]
@@ -111,14 +112,14 @@ namespace ColinChang.RedisHelper.Test
                 ["age"] = "18"
             });
 
-            Assert.True(await _redis.HashDeleteFieldsAsync(key, new[] {"gender", "name"}));
+            Assert.True(await _redis.HashDeleteFieldsAsync(key, new[] { "gender", "name" }));
 
             await _redis.HashSetFieldsAsync(key, new ConcurrentDictionary<string, string>
             {
                 ["age"] = "20"
             });
 
-            var dict = await _redis.HashGetFieldsAsync(key, new[] {"age"});
+            var dict = await _redis.HashGetFieldsAsync(key, new[] { "age" });
             Assert.Equal("20", dict["age"]);
 
             await _redis.HashDeleteAsync(key);
@@ -136,7 +137,7 @@ namespace ColinChang.RedisHelper.Test
             Assert.Equal("colin", await _redis.StringGetAsync<string>("name"));
             Assert.Equal("robin", (await _redis.SetMembersAsync<string>("guys")).FirstOrDefault());
 
-            await _redis.KeyDeleteAsync(new[] {"name", "guys"});
+            await _redis.KeyDeleteAsync(new[] { "name", "guys" });
         }
 
         [Fact]
@@ -209,7 +210,7 @@ namespace ColinChang.RedisHelper.Test
                                 _testOutputHelper.WriteLine(
                                     $"failed to get lock.\t{DateTime.Now.ToLongTimeString()}");
                         })
-                        {IsBackground = true}
+                        { IsBackground = true }
                     .Start();
                 await Task.Delay(500);
             }
@@ -245,6 +246,6 @@ namespace ColinChang.RedisHelper.Test
 
         public RedisHelperFixture() =>
             Redis = new RedisHelper(new RedisHelperOptions(
-                "192.168.0.203:6379,password=123123,connectTimeout=1000,connectRetry=1,syncTimeout=10000", 0));
+                "127.0.0.1:6379,password=123123,connectTimeout=1000,connectRetry=1,syncTimeout=10000", 0));
     }
 }

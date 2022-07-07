@@ -13,7 +13,7 @@ namespace ColinChang.RedisHelper
 
         Task<bool> StringSetAsync<T>(string key, T value);
 
-        Task<T> StringGetAsync<T>(string key) where T : class;
+        Task<T> StringGetAsync<T>(string key); // where T : class;
 
         Task<double> StringIncrementAsync(string key, int value = 1);
 

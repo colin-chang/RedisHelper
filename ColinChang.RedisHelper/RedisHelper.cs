@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 using StackExchange.Redis;
@@ -37,8 +36,10 @@ namespace ColinChang.RedisHelper
         public async Task<bool> StringSetAsync<T>(string key, T value) =>
             await _db.StringSetAsync(key, value.ToRedisValue());
 
-        public async Task<T> StringGetAsync<T>(string key) where T : class =>
-            (await _db.StringGetAsync(key)).ToObject<T>();
+        public async Task<T> StringGetAsync<T>(string key)
+            //where T : class 
+            =>
+                (await _db.StringGetAsync(key)).ToObject<T>();
 
         public async Task<double> StringIncrementAsync(string key, int value = 1) =>
             await _db.StringIncrementAsync(key, value);
@@ -141,7 +142,7 @@ namespace ColinChang.RedisHelper
         }
 
         public async Task<bool> HashDeleteAsync(string key) =>
-            await KeyDeleteAsync(new string[] {key}) > 0;
+            await KeyDeleteAsync(new string[] { key }) > 0;
 
         public async Task<bool> HashDeleteFieldsAsync(string key, IEnumerable<string> fields)
         {
@@ -173,7 +174,7 @@ namespace ColinChang.RedisHelper
             await _db.KeyExistsAsync(key);
 
         public async Task<long> KeyDeleteAsync(IEnumerable<string> keys) =>
-            await _db.KeyDeleteAsync(keys.Select(k => (RedisKey) k).ToArray());
+            await _db.KeyDeleteAsync(keys.Select(k => (RedisKey)k).ToArray());
 
 
         public async Task<bool> KeyExpireAsync(string key, TimeSpan? expiry) => await _db.KeyExpireAsync(key, expiry);
@@ -283,36 +284,34 @@ namespace ColinChang.RedisHelper
 
         private bool GetLock(string key, string value, TimeSpan expiry, int timeout)
         {
-            using (var waitHandle = new AutoResetEvent(false))
+            using var waitHandle = new AutoResetEvent(false);
+            var timer = new Timer(1000);
+            timer.Elapsed += (s, e) =>
             {
-                var timer = new Timer(1000);
-                timer.Elapsed += (s, e) =>
+                if (!_db.LockTake(key, value, expiry))
+                    return;
+                try
                 {
-                    if (!_db.LockTake(key, value, expiry))
-                        return;
-                    try
-                    {
-                        waitHandle.Set();
-                        timer.Stop();
-                    }
-                    catch
-                    {
-                    }
-                };
-                timer.Start();
+                    waitHandle.Set();
+                    timer.Stop();
+                }
+                catch
+                {
+                }
+            };
+            timer.Start();
 
 
-                if (timeout > 0)
-                    waitHandle.WaitOne(timeout);
-                else
-                    waitHandle.WaitOne();
+            if (timeout > 0)
+                waitHandle.WaitOne(timeout);
+            else
+                waitHandle.WaitOne();
 
-                timer.Stop();
-                timer.Close();
-                timer.Dispose();
+            timer.Stop();
+            timer.Close();
+            timer.Dispose();
 
-                return _db.LockQuery(key) == value;
-            }
+            return _db.LockQuery(key) == value;
         }
 
         #endregion
@@ -323,7 +322,7 @@ namespace ColinChang.RedisHelper
         public static IEnumerable<string> ToStrings(this IEnumerable<RedisKey> keys)
         {
             var redisKeys = keys as RedisKey[] ?? keys.ToArray();
-            return !redisKeys.Any() ? null : redisKeys.Select(k => (string) k);
+            return !redisKeys.Any() ? null : redisKeys.Select(k => (string)k);
         }
 
         public static RedisValue ToRedisValue<T>(this T value)
@@ -331,9 +330,12 @@ namespace ColinChang.RedisHelper
             if (value == null)
                 return RedisValue.Null;
 
-            return value is ValueType || value is string
-                ? value as string
-                : JsonConvert.SerializeObject(value);
+            return value switch
+            {
+                ValueType => value.ToString(),
+                string s => s,
+                _ => JsonConvert.SerializeObject(value)
+            };
         }
 
 
@@ -343,14 +345,16 @@ namespace ColinChang.RedisHelper
             return !enumerable.Any() ? null : enumerable.Select(v => v.ToRedisValue()).ToArray();
         }
 
-        public static T ToObject<T>(this RedisValue value) where T : class
+        public static T ToObject<T>(this RedisValue value)
+            //where T : class
         {
-            if (value == RedisValue.Null)
-                return null;
+            if (!value.HasValue)
+                return default;
 
-            return typeof(T) == typeof(string)
-                ? value.ToString() as T
-                : JsonConvert.DeserializeObject<T>(value.ToString());
+            if (typeof(T).IsSubclassOf(typeof(ValueType)) || typeof(T) == typeof(string))
+                return (T)Convert.ChangeType(value.ToString(), typeof(T));
+
+            return JsonConvert.DeserializeObject<T>(value.ToString());
         }
 
         public static IEnumerable<T> ToObjects<T>(this IEnumerable<RedisValue> values) where T : class

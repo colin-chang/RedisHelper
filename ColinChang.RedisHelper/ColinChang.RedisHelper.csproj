@@ -9,9 +9,8 @@
     <RepositoryType>Git</RepositoryType>
     <PackageTags>redis redis.net redis.driver redis.helper redis.net.core StackExchange redis.core</PackageTags>
     <Description>redis common helper based on StackExchange.Redis.It can help you to use the usual types in redis,including String,List,Set,SortedSet,Hash.It also supports Pub/Sub,Patch Commands,distribution lock.</Description>
-    <PackageReleaseNotes>1.update constructors 2.update dependencies</PackageReleaseNotes>
-    <Version>1.2.6</Version>
-    <PackageVersion>1.2.6</PackageVersion>
+    <PackageReleaseNotes>1.fix bugs 2.update dependencies</PackageReleaseNotes>
+    <Version>1.2.7</Version>
     <PackageIcon>icon.png</PackageIcon>
     <PackageIconUrl>https://raw.githubusercontent.com/colin-chang/RedisHelper/main/icon.png</PackageIconUrl>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
@@ -25,12 +24,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="5.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Options" Version="5.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="5.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Options.DataAnnotations" Version="5.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="6.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Options" Version="6.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="6.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Options.DataAnnotations" Version="6.0.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
-    <PackageReference Include="StackExchange.Redis" Version="2.2.4" />
+    <PackageReference Include="StackExchange.Redis" Version="2.6.48" />
   </ItemGroup>
 
   <ItemGroup>
